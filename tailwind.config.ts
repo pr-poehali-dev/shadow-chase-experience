@@ -7,6 +7,7 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+			"./1775372431192398481.html"
 	],
 	prefix: "",
 	theme: {
@@ -68,27 +69,43 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			fontFamily: {
+				'terminal': ['Share Tech Mono', 'monospace'],
+				'display': ['VT323', 'monospace'],
+				'header': ['Russo One', 'sans-serif'],
+			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'glitch-skew': {
+					'0%, 100%': { transform: 'skew(0deg)' },
+					'20%': { transform: 'skew(-2deg)' },
+					'40%': { transform: 'skew(1deg)' },
+					'60%': { transform: 'skew(-1deg)' },
+					'80%': { transform: 'skew(2deg)' }
+				},
+				'screen-on': {
+					'0%': { opacity: '0', filter: 'brightness(5)' },
+					'30%': { opacity: '1', filter: 'brightness(1.5)' },
+					'100%': { opacity: '1', filter: 'brightness(1)' }
+				},
+				'rain-fall': {
+					'0%': { transform: 'translateY(-100%)' },
+					'100%': { transform: 'translateY(100vh)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glitch-skew': 'glitch-skew 4s infinite',
+				'screen-on': 'screen-on 0.8s ease-out forwards',
+				'rain-fall': 'rain-fall linear infinite',
 			}
 		}
 	},

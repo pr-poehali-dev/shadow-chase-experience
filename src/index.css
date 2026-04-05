@@ -4,89 +4,57 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 4%;
+    --foreground: 120 60% 70%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 120 10% 8%;
+    --card-foreground: 120 60% 70%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 120 10% 8%;
+    --popover-foreground: 120 60% 70%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 120 80% 45%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 120 10% 12%;
+    --secondary-foreground: 120 60% 70%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 120 10% 12%;
+    --muted-foreground: 120 20% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 60 100% 50%;
+    --accent-foreground: 0 0% 4%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 4%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 120 30% 20%;
+    --input: 120 10% 12%;
+    --ring: 120 80% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Game custom vars */
+    --color-green: #39ff14;
+    --color-green-dim: #1a7a0a;
+    --color-red: #ff2020;
+    --color-yellow: #ffd700;
+    --color-fog: rgba(20, 60, 20, 0.6);
+    --color-dark: #080e08;
+    --color-terminal: #0a140a;
+    --color-border-glow: rgba(57, 255, 20, 0.4);
+    --font-terminal: "Share Tech Mono", monospace;
+    --font-display: "VT323", monospace;
+    --font-header: "Russo One", sans-serif;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 120 10% 6%;
+    --sidebar-foreground: 120 60% 70%;
+    --sidebar-primary: 120 80% 45%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 120 10% 12%;
+    --sidebar-accent-foreground: 120 60% 70%;
+    --sidebar-border: 120 30% 20%;
+    --sidebar-ring: 120 80% 45%;
   }
 }
 
@@ -97,5 +65,386 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-terminal);
+    overflow: hidden;
+    cursor: crosshair;
+  }
+}
+
+/* === SCANLINES EFFECT === */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* === CRT SCREEN FLICKER === */
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.85;
+  }
+  94% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.9;
+  }
+  97% {
+    opacity: 1;
+  }
+}
+
+.crt-screen {
+  animation: crt-flicker 8s infinite;
+}
+
+/* === GLITCH TEXT === */
+@keyframes glitch-1 {
+  0%,
+  100% {
+    clip-path: inset(0 0 95% 0);
+    transform: translate(-3px, 0);
+  }
+  20% {
+    clip-path: inset(30% 0 50% 0);
+    transform: translate(3px, 0);
+  }
+  40% {
+    clip-path: inset(70% 0 10% 0);
+    transform: translate(-2px, 0);
+  }
+  60% {
+    clip-path: inset(10% 0 80% 0);
+    transform: translate(2px, 0);
+  }
+  80% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(-1px, 0);
+  }
+}
+
+@keyframes glitch-2 {
+  0%,
+  100% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(3px, 0);
+  }
+  20% {
+    clip-path: inset(5% 0 85% 0);
+    transform: translate(-3px, 0);
+  }
+  40% {
+    clip-path: inset(45% 0 40% 0);
+    transform: translate(2px, 0);
+  }
+  60% {
+    clip-path: inset(60% 0 25% 0);
+    transform: translate(-2px, 0);
+  }
+  80% {
+    clip-path: inset(20% 0 65% 0);
+    transform: translate(1px, 0);
+  }
+}
+
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+}
+.glitch-text::before {
+  color: var(--color-red);
+  animation: glitch-1 3s infinite linear;
+}
+.glitch-text::after {
+  color: #00ffff;
+  animation: glitch-2 3s infinite linear;
+  animation-delay: 0.1s;
+}
+
+/* === TYPING CURSOR === */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.cursor-blink::after {
+  content: "█";
+  animation: blink 1s step-end infinite;
+  color: var(--color-green);
+}
+
+/* === PARTICLES === */
+@keyframes float-up {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-40px) translateX(10px) scale(0.8);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-80px) translateX(-5px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.particle {
+  animation: float-up linear infinite;
+}
+
+/* === NOISE OVERLAY === */
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === TERMINAL BOX === */
+.terminal-box {
+  background: var(--color-terminal);
+  border: 1px solid var(--color-green-dim);
+  box-shadow:
+    0 0 20px rgba(57, 255, 20, 0.15),
+    inset 0 0 40px rgba(0, 0, 0, 0.8);
+  font-family: var(--font-terminal);
+}
+
+.terminal-box-glow {
+  border-color: var(--color-green);
+  box-shadow:
+    0 0 30px rgba(57, 255, 20, 0.4),
+    0 0 60px rgba(57, 255, 20, 0.1),
+    inset 0 0 20px rgba(57, 255, 20, 0.05);
+}
+
+/* === MENU ITEM HOVER === */
+@keyframes menu-hover-in {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.menu-item {
+  position: relative;
+  cursor: pointer;
+  font-family: var(--font-terminal);
+  font-size: 1.1rem;
+  color: var(--color-green-dim);
+  letter-spacing: 0.1em;
+  transition: color 0.2s ease;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.menu-item::before {
+  content: "> ";
+  opacity: 0;
+  color: var(--color-green);
+  transition: opacity 0.2s;
+}
+.menu-item:hover::before {
+  opacity: 1;
+}
+.menu-item:hover {
+  color: var(--color-green);
+  text-shadow: 0 0 12px rgba(57, 255, 20, 0.8);
+}
+.menu-item.active {
+  color: var(--color-green);
+  text-shadow: 0 0 12px rgba(57, 255, 20, 0.8);
+}
+.menu-item.active::before {
+  opacity: 1;
+}
+
+/* === POLYGON CITY BG === */
+@keyframes fog-drift {
+  0% {
+    transform: translateX(0) scaleY(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(30px) scaleY(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(0) scaleY(1);
+    opacity: 0.5;
+  }
+}
+.fog-layer {
+  animation: fog-drift 12s ease-in-out infinite;
+}
+
+/* === ENTITY SILHOUETTE === */
+@keyframes entity-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.9));
+    transform: scale(1.02);
+  }
+}
+@keyframes entity-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.entity-silhouette {
+  animation:
+    entity-pulse 2s ease-in-out infinite,
+    entity-appear 1.5s ease-out forwards;
+}
+
+/* === DIALOG BOX === */
+@keyframes dialog-open {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+    transform-origin: bottom;
+  }
+}
+.dialog-panel {
+  animation: dialog-open 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* === STATIC NOISE FLASH === */
+@keyframes static-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  5%,
+  15% {
+    opacity: 0.08;
+  }
+  10% {
+    opacity: 0.15;
+  }
+}
+.static-noise {
+  animation: static-flash 4s infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* === HEALTH BAR === */
+.health-fill {
+  background: linear-gradient(90deg, #ff2020, #ff6b00);
+  box-shadow: 0 0 8px rgba(255, 32, 32, 0.6);
+  transition: width 0.3s ease;
+}
+
+/* === SCROLL AREA === */
+.game-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.game-scroll::-webkit-scrollbar-track {
+  background: var(--color-dark);
+}
+.game-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-green-dim);
+}
+
+/* === ANIMATIONS === */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease forwards;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.6s ease forwards;
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease forwards;
+}
+
+/* === TYPEWRITER === */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
   }
 }
