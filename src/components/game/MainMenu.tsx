@@ -111,7 +111,7 @@ const MainMenu = ({ onStart, onSettings, onHover }: Props) => {
               textShadow: '0 2px 24px rgba(180,140,60,0.3)',
             }}
           >
-            Пустой&nbsp;город
+            Stand&nbsp;RP
           </h1>
           <p
             style={{
