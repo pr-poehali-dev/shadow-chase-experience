@@ -1,8 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { GameState } from '@/pages/Index';
 import CityEngine from './CityEngine';
 import * as THREE from 'three';
-import Icon from '@/components/ui/icon';
 
 interface Props {
   gameState: GameState;
@@ -13,89 +12,140 @@ interface Props {
 }
 
 const GameWorld = ({ onDialog, onMenu, onHover, playBeep }: Props) => {
-  const [pos, setPos] = useState({ x: 0, z: 0 });
-  const [fps, setFps] = useState(60);
   const [hint, setHint] = useState(true);
-  const [entityNear, setEntityNear] = useState(false);
+  const [shadowDist, setShadowDist] = useState(99);
+  const [isLooking, setIsLooking] = useState(false);
+  const [contactVisible, setContactVisible] = useState(false);
+  const [vignette, setVignette] = useState(0);
   const contactFired = useRef(false);
 
-  const handleHUDUpdate = useCallback((data: { pos: THREE.Vector3; fps: number }) => {
-    setPos({ x: Math.round(data.pos.x), z: Math.round(data.pos.z) });
-    setFps(data.fps);
+  // Vignette intensifies as shadow gets closer
+  useEffect(() => {
+    const intensity = Math.max(0, Math.min(1, (12 - shadowDist) / 10));
+    setVignette(intensity);
+  }, [shadowDist]);
+
+  // Play a low drone when looking at shadow
+  useEffect(() => {
+    if (isLooking) {
+      playBeep(60, 0.4, 'sawtooth', 0.06);
+    }
+  }, [isLooking, playBeep]);
+
+  const handleHUDUpdate = useCallback((data: { pos: THREE.Vector3; fps: number; shadowDist: number; isLooking: boolean }) => {
+    setShadowDist(data.shadowDist);
+    setIsLooking(data.isLooking);
   }, []);
 
   const handleEntityContact = useCallback(() => {
     if (contactFired.current) return;
     contactFired.current = true;
-    setEntityNear(true);
-    playBeep(120, 0.5, 'sawtooth', 0.2);
-    setTimeout(() => playBeep(90, 0.8, 'sawtooth', 0.15), 400);
+    setContactVisible(true);
     setHint(false);
+    playBeep(80, 0.6, 'sawtooth', 0.18);
+    setTimeout(() => playBeep(55, 1.0, 'sawtooth', 0.12), 500);
   }, [playBeep]);
+
+  // Proximity warning sound
+  useEffect(() => {
+    if (shadowDist < 6 && shadowDist > 2.5) {
+      const interval = setInterval(() => {
+        playBeep(80 + (6 - shadowDist) * 10, 0.08, 'sine', 0.04);
+      }, 1200);
+      return () => clearInterval(interval);
+    }
+  }, [shadowDist, playBeep]);
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-black">
 
-      {/* Three.js canvas */}
-      <CityEngine
-        onEntityContact={handleEntityContact}
-        onHUDUpdate={handleHUDUpdate}
+      <CityEngine onEntityContact={handleEntityContact} onHUDUpdate={handleHUDUpdate} />
+
+      {/* Dreamcore vignette — gets stronger as shadow approaches */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10 transition-all duration-700"
+        style={{
+          background: `radial-gradient(ellipse at center, transparent ${35 - vignette * 20}%, rgba(30,15,5,${0.4 + vignette * 0.45}) 100%)`,
+        }}
       />
 
-      {/* Scanlines overlay */}
-      <div className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)' }} />
+      {/* "Looking at shadow" flash */}
+      {isLooking && (
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{ background: 'rgba(0,0,0,0.18)', transition: 'opacity 0.2s' }}
+        />
+      )}
 
-      {/* Vignette */}
-      <div className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.75) 100%)' }} />
+      {/* Subtle film grain */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10 opacity-5"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
-      {/* Crosshair */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-        <div className="relative w-5 h-5">
-          <div className="absolute top-1/2 left-0 right-0 h-px -translate-y-1/2" style={{ background: 'rgba(57,255,20,0.7)' }} />
-          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2" style={{ background: 'rgba(57,255,20,0.7)' }} />
-          <div className="absolute inset-0 m-auto w-1 h-1 rounded-full" style={{ background: 'rgba(57,255,20,0.5)' }} />
+      {/* "Looking back" whisper text */}
+      {isLooking && !contactVisible && (
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 animate-fade-in text-center"
+          style={{ fontFamily: '"Courier New", monospace', color: 'rgba(255,255,255,0.18)', fontSize: '1.1rem', letterSpacing: '0.3em' }}
+        >
+          там кто-то есть
         </div>
-      </div>
+      )}
 
-      {/* HUD: top left */}
-      <div className="absolute top-4 left-4 z-20 pointer-events-none">
-        <div className="terminal-box px-3 py-2">
-          <div className="font-terminal text-xs mb-1" style={{ color: 'var(--color-green-dim)', opacity: 0.5 }}>ЛОКАЦИЯ</div>
-          <div className="font-terminal text-sm" style={{ color: 'var(--color-green)' }}>
-            СЕКТОР-7 // X:{pos.x} Z:{pos.z}
-          </div>
+      {/* Proximity text */}
+      {shadowDist < 5 && !contactVisible && (
+        <div
+          className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center animate-fade-in"
+          style={{ fontFamily: '"Courier New", monospace', color: `rgba(40,20,10,${0.5 + (5 - shadowDist) * 0.12})`, fontSize: '0.7rem', letterSpacing: '0.25em' }}
+        >
+          не оглядывайся
         </div>
-      </div>
+      )}
 
-      {/* HUD: top right */}
-      <div className="absolute top-4 right-4 z-20 pointer-events-none">
-        <div className="terminal-box px-3 py-2 text-right">
-          <div className="font-terminal text-xs" style={{ color: 'var(--color-green-dim)', opacity: 0.4 }}>{fps} FPS</div>
-          <div className="flex items-center gap-2 mt-1 justify-end">
-            <div className="w-24 h-2 bg-black border border-red-900">
-              <div className="health-fill h-full" style={{ width: '85%' }} />
+      {/* Contact prompt */}
+      {contactVisible && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 animate-fade-in">
+          <div
+            className="text-center px-12 py-10"
+            style={{
+              background: 'rgba(15,8,3,0.88)',
+              border: '1px solid rgba(150,110,60,0.25)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <div
+              style={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '0.4em', color: 'rgba(180,140,80,0.55)', marginBottom: '1.5rem' }}
+            >
+              КОНТАКТ УСТАНОВЛЕН
             </div>
-            <span className="font-terminal text-xs" style={{ color: '#ff6b00' }}>85%</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Entity contact prompt */}
-      {entityNear && (
-        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 animate-fade-in">
-          <div className="terminal-box terminal-box-glow px-6 py-4 text-center"
-            style={{ borderColor: 'rgba(255,32,32,0.6)', boxShadow: '0 0 30px rgba(255,20,20,0.3)' }}>
-            <div className="font-terminal text-xs mb-2" style={{ color: 'var(--color-red)', opacity: 0.7 }}>ОБНАРУЖЕН КОНТАКТ</div>
-            <div className="font-display text-2xl mb-3" style={{ color: 'var(--color-red)' }}>ЧТО-ТО ЗДЕСЬ...</div>
+            <h2
+              style={{ fontFamily: '"Georgia", serif', fontSize: '2rem', fontWeight: 400, color: 'rgba(220,200,160,0.9)', marginBottom: '0.5rem', lineHeight: 1.2 }}
+            >
+              Оно повернулось
+            </h2>
+            <p
+              style={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: 'rgba(160,130,80,0.5)', letterSpacing: '0.15em', marginBottom: '2.5rem' }}
+            >
+              ты знал что нельзя было смотреть
+            </p>
             <button
-              className="font-terminal text-sm px-6 py-2 pointer-events-auto"
-              style={{ background: 'var(--color-red)', color: '#fff', boxShadow: '0 0 20px rgba(255,20,20,0.5)' }}
+              style={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.8rem',
+                letterSpacing: '0.2em',
+                color: 'rgba(220,190,130,0.8)',
+                background: 'none',
+                border: '1px solid rgba(180,140,80,0.35)',
+                padding: '0.7rem 2rem',
+                cursor: 'pointer',
+              }}
               onClick={() => { onHover(); onDialog(); }}
               onMouseEnter={onHover}
             >
-              [E] ВСТУПИТЬ В КОНТАКТ
+              поговорить с ним
             </button>
           </div>
         </div>
@@ -103,25 +153,30 @@ const GameWorld = ({ onDialog, onMenu, onHover, playBeep }: Props) => {
 
       {/* Controls hint */}
       {hint && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-fade-in pointer-events-none">
-          <div className="terminal-box px-5 py-3 text-center">
-            <div className="font-terminal text-xs" style={{ color: 'var(--color-green-dim)', opacity: 0.7 }}>
-              КЛИКНИТЕ → захват мыши &nbsp;|&nbsp; WASD — движение &nbsp;|&nbsp; МЫШЬ — обзор &nbsp;|&nbsp; ESC — выход
-            </div>
-          </div>
+        <div
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center animate-fade-in"
+          style={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: 'rgba(80,55,25,0.5)', letterSpacing: '0.2em' }}
+        >
+          клик — захват мыши &nbsp;·&nbsp; WASD — движение &nbsp;·&nbsp; мышь — обзор &nbsp;·&nbsp; ESC — выход
         </div>
       )}
 
       {/* Back to menu */}
-      <div className="absolute bottom-4 left-4 z-20">
+      <div className="absolute top-5 left-5 z-20">
         <button
-          className="terminal-box px-3 py-2 font-terminal text-xs transition-all"
-          style={{ color: 'var(--color-green-dim)', borderColor: 'var(--color-green-dim)' }}
+          style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.65rem',
+            letterSpacing: '0.2em',
+            color: 'rgba(80,55,25,0.45)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+          }}
           onClick={onMenu}
           onMouseEnter={onHover}
         >
-          <Icon name="ArrowLeft" size={12} className="inline mr-1" />
-          МЕНЮ
+          ← меню
         </button>
       </div>
     </div>
