@@ -113,7 +113,7 @@ const MainMenu = ({ onStart, onSettings, onHover }: Props) => {
           </div>
           {bootLines.map((line, i) => (
             <div key={i} className="mb-1"
-              style={{ color: line.includes('ПРЕДУПРЕЖДЕНИЕ') || line.includes('АНОМАЛИИ') ? 'var(--color-red)' : line.includes('OK') || line.includes('ГОТОВ') ? 'var(--color-green)' : 'var(--color-green-dim)' }}>
+              style={{ color: line?.includes('ПРЕДУПРЕЖДЕНИЕ') || line?.includes('АНОМАЛИИ') ? 'var(--color-red)' : line?.includes('OK') || line?.includes('ГОТОВ') ? 'var(--color-green)' : 'var(--color-green-dim)' }}>
               {line}
             </div>
           ))}
